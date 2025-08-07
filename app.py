@@ -72,12 +72,7 @@ st.markdown("""
         transform: translateY(-2px);
     }
     
-    @media (max-width: 768px) {
-        /* Only hide the quick topics section on mobile, not feedback */
-        .quick-topics-mobile-hide {
-            display: none !important;
-        }
-    }
+    
     
     @media (min-width: 769px) {
         .main-content {
