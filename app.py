@@ -278,7 +278,7 @@ class LinkedInPostGenerator:
             # Simple copy button with feedback
             if st.button("📋 Copy Post", key=f"copy_btn_{st.session_state.iteration_count}"):
                 # Show success message
-                st.success("✅ Copied! Text is ready to paste")
+                st.success("✅ Copied!")
                 
                 
         
