@@ -271,16 +271,75 @@ class LinkedInPostGenerator:
         st.markdown("### 📄 Your Generated Post")
         st.markdown(f'<div class="post-container">{st.session_state.current_post}</div>', unsafe_allow_html=True)
         
-        # Copy functionality
+        # Copy functionality that actually works
         col1, col2 = st.columns([1, 1])
         
         with col1:
-            # Simple copy button with feedback
-            if st.button("📋 Copy Post", key=f"copy_btn_{st.session_state.iteration_count}"):
-                # Show success message
-                st.success("✅ Copied!")
+            # Escape the post content for JavaScript
+            escaped_post = st.session_state.current_post.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n').replace('\r', '\\r').replace('\t', '\\t')
+            
+            # Working copy button with JavaScript
+            copy_html = f"""
+            <div>
+                <button id="copyBtn" onclick="copyToClipboard()" 
+                        style="background: linear-gradient(90deg, #0077B5 0%, #005885 100%);
+                               color: white; border-radius: 25px; border: none; 
+                               padding: 0.5rem 2rem; font-weight: 600;
+                               cursor: pointer; font-size: 14px; margin: 10px 0;">
+                    📋 Copy Post
+                </button>
+            </div>
+            
+            <script>
+            async function copyToClipboard() {{
+                const text = `{escaped_post}`;
+                const button = document.getElementById('copyBtn');
                 
-                
+                try {{
+                    await navigator.clipboard.writeText(text);
+                    button.innerHTML = '✅ Copied';
+                    button.style.background = '#28a745';
+                    
+                    setTimeout(() => {{
+                        button.innerHTML = '📋 Copy Post';
+                        button.style.background = 'linear-gradient(90deg, #0077B5 0%, #005885 100%)';
+                    }}, 2000);
+                }} catch (err) {{
+                    // Fallback method
+                    const textArea = document.createElement('textarea');
+                    textArea.value = text;
+                    textArea.style.position = 'fixed';
+                    textArea.style.left = '-999999px';
+                    textArea.style.top = '-999999px';
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    
+                    try {{
+                        document.execCommand('copy');
+                        button.innerHTML = '✅ Copied';
+                        button.style.background = '#28a745';
+                        
+                        setTimeout(() => {{
+                            button.innerHTML = '📋 Copy Post';
+                            button.style.background = 'linear-gradient(90deg, #0077B5 0%, #005885 100%)';
+                        }}, 2000);
+                    }} catch (err2) {{
+                        button.innerHTML = '❌ Copy failed';
+                        button.style.background = '#dc3545';
+                        setTimeout(() => {{
+                            button.innerHTML = '📋 Copy Post';
+                            button.style.background = 'linear-gradient(90deg, #0077B5 0%, #005885 100%)';
+                        }}, 2000);
+                    }}
+                    
+                    document.body.removeChild(textArea);
+                }}
+            }}
+            </script>
+            """
+            
+            st.components.v1.html(copy_html, height=80)
         
         with col2:
             st.metric("Character Count", len(st.session_state.current_post))
