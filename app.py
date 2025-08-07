@@ -72,7 +72,21 @@ st.markdown("""
         transform: translateY(-2px);
     }
     
-    
+    @media (max-width: 768px) {
+        /* Completely hide quick topics section on mobile */
+        .quick-topics-mobile-hide {
+            display: none !important;
+        }
+        
+        /* Make the topic input full width on mobile by hiding the second column */
+        .stColumns > div:nth-child(2) {
+            display: none !important;
+        }
+        
+        .stColumns > div:nth-child(1) {
+            width: 100% !important;
+        }
+    }
     
     @media (min-width: 769px) {
         .main-content {
