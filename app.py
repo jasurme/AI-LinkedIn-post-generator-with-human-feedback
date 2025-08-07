@@ -134,7 +134,7 @@ class LinkedInPostGenerator:
         """
         
         response = self.llm.invoke([
-            SystemMessage(content="You are an expert LinkedIn content writer with 10+ years of experience creating viral, engaging posts that drive meaningful professional conversations."),
+            SystemMessage(content="You are an expert LinkedIn content writer with 10+ years of experience helping users create posts according to their feedback to your generated post. Keep posts in less than 1000 characters unless user explicitly say otherwise. So under 1000 characters. and don't start with cliche starting. adjusting to topic given to you, start like real human being. start directly with topic given to you. again but not be cliche. but a bit hook"),
             HumanMessage(content=prompt)
         ])
         
