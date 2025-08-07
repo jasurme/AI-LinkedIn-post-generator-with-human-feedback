@@ -156,6 +156,22 @@ class LinkedInPostGenerator:
             - "Add more emotional appeal"
             """)
             
+            # Quick topics in sidebar (always visible, especially for mobile)
+            if not st.session_state.current_post:  # Only show when no post generated
+                st.markdown("### 🎯 Quick Topics")
+                if st.button("💼 Career Growth", key="career_sidebar"):
+                    st.session_state.quick_topic = "Career growth strategies for young professionals in tech"
+                    st.rerun()
+                if st.button("🤝 Networking", key="networking_sidebar"):
+                    st.session_state.quick_topic = "The power of authentic networking in building meaningful professional relationships"
+                    st.rerun()
+                if st.button("🧠 Learning", key="learning_sidebar"):
+                    st.session_state.quick_topic = "Why continuous learning is essential in today's fast-changing workplace"
+                    st.rerun()
+                if st.button("🚀 Innovation", key="innovation_sidebar"):
+                    st.session_state.quick_topic = "How to foster innovation and creativity in remote work environments"
+                    st.rerun()
+            
             st.markdown("### 📊 Session Stats")
             st.metric("Posts Generated", len(st.session_state.generated_posts))
             st.metric("Feedback Given", len(st.session_state.all_feedbacks))
@@ -176,7 +192,7 @@ class LinkedInPostGenerator:
         
         # Only show quick topics if no post has been generated yet
         if not st.session_state.current_post:
-            # Desktop layout: Show quick topics on main area
+            # Desktop: Show quick topics in main area
             topic_col, quick_topics_col = st.columns([3, 1])
             
             with topic_col:
@@ -197,7 +213,7 @@ class LinkedInPostGenerator:
                         help="Describe what you want your LinkedIn post to be about. Be as specific as possible!"
                     )
             
-            # Quick topics only on desktop and only when no post generated
+            # Quick topics only on desktop (hidden on mobile via CSS)
             with quick_topics_col:
                 st.markdown('<div class="quick-topics-mobile-hide">', unsafe_allow_html=True)
                 st.markdown("### 🎯 Quick Topics")
@@ -215,8 +231,7 @@ class LinkedInPostGenerator:
                     st.rerun()
                 st.markdown('</div>', unsafe_allow_html=True)
         else:
-            # When post exists, show only topic input (full width)
-            # Check for quick topic selection
+            # When post exists, show only topic input (full width)  
             if 'quick_topic' in st.session_state:
                 topic = st.text_area(
                     "Enter your LinkedIn topic or idea:",
