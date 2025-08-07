@@ -76,7 +76,39 @@ st.markdown("""
         transform: translateY(-2px);
     }
 </style>
-""", unsafe_allow_html=True)
+        # Custom CSS for better styling and mobile responsiveness
+        st.markdown("""
+        <style>
+        /* Hide quick topics on mobile */
+        @media (max-width: 768px) {
+            .stColumn:nth-child(2) {
+                display: none !important;
+            }
+        }
+        
+        /* Copy area styling */
+        .copy-area {
+            border: 2px dashed #0077B5 !important;
+            border-radius: 10px !important;
+            background-color: #f0f8ff !important;
+        }
+        
+        /* Mobile responsive layout */
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+        }
+        
+        /* Desktop layout */
+        @media (min-width: 769px) {
+            .main-content {
+                display: flex;
+                gap: 2rem;
+            }
+        }
+        </style>
+        """, unsafe_allow_html=True)
 
 class LinkedInPostGenerator:
     def __init__(self):
@@ -129,15 +161,6 @@ class LinkedInPostGenerator:
     def render_sidebar(self):
         """Render sidebar with instructions and tips"""
         with st.sidebar:
-            st.markdown("### 📋 How It Works")
-            st.markdown("""
-            1. **Enter your topic** - What do you want to write about?
-            2. **Review generated post** - AI creates your first draft
-            3. **Provide feedback** - Tell the AI what to improve
-            4. **Iterate until perfect** - Keep refining with feedback
-            5. **Download final post** - Save your polished content
-            """)
-            
             st.markdown("### 💡 Feedback Tips")
             st.markdown("""
             **Good feedback examples:**
@@ -147,6 +170,18 @@ class LinkedInPostGenerator:
             - "Make it shorter and punchier"
             - "Add more emotional appeal"
             """)
+            
+            # Quick topics on mobile (hide on desktop)
+            if st.session_state.get('is_mobile', False):
+                st.markdown("### 🎯 Quick Topics")
+                if st.button("💼 Career Growth", key="career_mobile"):
+                    st.session_state.quick_topic = "Career growth strategies for young professionals in tech"
+                if st.button("🤝 Networking", key="networking_mobile"):
+                    st.session_state.quick_topic = "The power of authentic networking in building meaningful professional relationships"
+                if st.button("🧠 Learning", key="learning_mobile"):
+                    st.session_state.quick_topic = "Why continuous learning is essential in today's fast-changing workplace"
+                if st.button("🚀 Innovation", key="innovation_mobile"):
+                    st.session_state.quick_topic = "How to foster innovation and creativity in remote work environments"
             
             st.markdown("### 📊 Session Stats")
             st.metric("Posts Generated", len(st.session_state.generated_posts))
@@ -163,28 +198,50 @@ class LinkedInPostGenerator:
         """Render main application interface"""
         st.markdown('<h1 class="main-header">🚀 AI LinkedIn Post Generator</h1>', unsafe_allow_html=True)
         
+        # Detect mobile (simple check based on viewport)
+        if 'is_mobile' not in st.session_state:
+            st.session_state.is_mobile = False
+        
         # Topic input section
         st.markdown("### 📝 What would you like to write about?")
-        col1, col2 = st.columns([3, 1])
         
-        with col1:
-            topic = st.text_area(
-                "Enter your LinkedIn topic or idea:",
-                placeholder="e.g., The importance of continuous learning in tech careers...",
-                height=100,
-                help="Describe what you want your LinkedIn post to be about. Be as specific as possible!"
-            )
+        # Desktop layout: Show quick topics on main area
+        # Mobile layout: Hide quick topics from main area (moved to sidebar)
+        topic_col, quick_topics_col = st.columns([3, 1])
         
-        with col2:
+        with topic_col:
+            # Check for quick topic selection
+            if 'quick_topic' in st.session_state:
+                topic = st.text_area(
+                    "Enter your LinkedIn topic or idea:",
+                    value=st.session_state.quick_topic,
+                    height=100,
+                    help="Describe what you want your LinkedIn post to be about. Be as specific as possible!"
+                )
+                del st.session_state.quick_topic  # Clear after use
+            else:
+                topic = st.text_area(
+                    "Enter your LinkedIn topic or idea:",
+                    placeholder="e.g., The importance of continuous learning in tech careers...",
+                    height=100,
+                    help="Describe what you want your LinkedIn post to be about. Be as specific as possible!"
+                )
+        
+        # Quick topics only on desktop
+        with quick_topics_col:
             st.markdown("### 🎯 Quick Topics")
             if st.button("💼 Career Growth", key="career"):
-                topic = "Career growth strategies for young professionals in tech"
+                st.session_state.quick_topic = "Career growth strategies for young professionals in tech"
+                st.rerun()
             if st.button("🤝 Networking", key="networking"):
-                topic = "The power of authentic networking in building meaningful professional relationships"
+                st.session_state.quick_topic = "The power of authentic networking in building meaningful professional relationships"
+                st.rerun()
             if st.button("🧠 Learning", key="learning"):
-                topic = "Why continuous learning is essential in today's fast-changing workplace"
+                st.session_state.quick_topic = "Why continuous learning is essential in today's fast-changing workplace"
+                st.rerun()
             if st.button("🚀 Innovation", key="innovation"):
-                topic = "How to foster innovation and creativity in remote work environments"
+                st.session_state.quick_topic = "How to foster innovation and creativity in remote work environments"
+                st.rerun()
         
         # Generate initial post
         if st.button("✨ Generate Post", type="primary", disabled=not topic):
@@ -207,35 +264,37 @@ class LinkedInPostGenerator:
             else:
                 st.warning("⚠️ Please enter a topic first!")
         
-        # Display current post
+        # Layout: Desktop (post on right, feedback on left) vs Mobile (stacked)
         if st.session_state.current_post:
-            self.render_current_post()
-            self.render_feedback_section()
-            self.render_post_history()
+            # Desktop layout - two columns
+            post_col, feedback_col = st.columns([1, 1])
+            
+            with post_col:
+                self.render_current_post()
+                self.render_post_history()
+            
+            with feedback_col:
+                self.render_feedback_section()
     
     def render_current_post(self):
         """Render the current generated post"""
         st.markdown("### 📄 Your Generated Post")
         st.markdown(f'<div class="post-container">{st.session_state.current_post}</div>', unsafe_allow_html=True)
         
-        # Action buttons
-        col1, col2, col3 = st.columns(3)
+        # Copy functionality using streamlit-clipboard (fallback to text_area)
+        col1, col2 = st.columns([1, 1])
         
         with col1:
-            if st.button("📥 Download Post", key="download"):
-                st.download_button(
-                    label="📥 Download as TXT",
-                    data=st.session_state.current_post,
-                    file_name=f"linkedin_post_{st.session_state.session_id[:8]}.txt",
-                    mime="text/plain"
-                )
+            # Create a text area that's easy to copy from
+            st.text_area(
+                "👆 Select all and copy (Ctrl+C / Cmd+C):",
+                value=st.session_state.current_post,
+                height=100,
+                key=f"copy_area_{st.session_state.iteration_count}",
+                help="Click in the box above, press Ctrl+A (or Cmd+A) to select all, then Ctrl+C (or Cmd+C) to copy!"
+            )
         
         with col2:
-            if st.button("📋 Copy to Clipboard", key="copy"):
-                st.code(st.session_state.current_post, language=None)
-                st.info("💡 Select all text above and copy with Ctrl+C (Cmd+C on Mac)")
-        
-        with col3:
             st.metric("Character Count", len(st.session_state.current_post))
     
     def render_feedback_section(self):
