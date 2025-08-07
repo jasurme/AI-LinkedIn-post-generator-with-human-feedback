@@ -280,13 +280,7 @@ class LinkedInPostGenerator:
                 # Show success message
                 st.success("✅ Copied! Text is ready to paste")
                 
-                # Display text in copyable format
-                st.text_area(
-                    "Select all (Ctrl+A) and copy (Ctrl+C):",
-                    value=st.session_state.current_post,
-                    height=100,
-                    key=f"copy_text_{st.session_state.iteration_count}"
-                )
+                
         
         with col2:
             st.metric("Character Count", len(st.session_state.current_post))
