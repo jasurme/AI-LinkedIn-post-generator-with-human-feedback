@@ -271,53 +271,22 @@ class LinkedInPostGenerator:
         st.markdown("### 📄 Your Generated Post")
         st.markdown(f'<div class="post-container">{st.session_state.current_post}</div>', unsafe_allow_html=True)
         
-        # Real auto-copy functionality
+        # Copy functionality
         col1, col2 = st.columns([1, 1])
         
         with col1:
-            # Create invisible text area and auto-copy button
-            post_text = st.session_state.current_post.replace('"', '\\"').replace('\n', '\\n')
-            copy_button_html = f"""
-            <div style="margin: 10px 0;">
-                <textarea id="post_content" style="position: absolute; left: -9999px;">{st.session_state.current_post}</textarea>
-                <button onclick="copyPost()" 
-                        style="background: linear-gradient(90deg, #0077B5 0%, #005885 100%);
-                               color: white; border-radius: 25px; border: none; 
-                               padding: 0.5rem 2rem; font-weight: 600;
-                               cursor: pointer; font-size: 14px;">
-                    📋 Copy Post
-                </button>
-            </div>
-            <script>
-                function copyPost() {{
-                    const textarea = document.getElementById('post_content');
-                    textarea.select();
-                    textarea.setSelectionRange(0, 99999);
-                    
-                    try {{
-                        navigator.clipboard.writeText(textarea.value).then(function() {{
-                            // Change button text temporarily
-                            event.target.innerHTML = '✅ Copied';
-                            event.target.style.background = '#28a745';
-                            setTimeout(function() {{
-                                event.target.innerHTML = '📋 Copy Post';
-                                event.target.style.background = 'linear-gradient(90deg, #0077B5 0%, #005885 100%)';
-                            }}, 2000);
-                        }});
-                    }} catch (err) {{
-                        // Fallback for older browsers
-                        document.execCommand('copy');
-                        event.target.innerHTML = '✅ Copied';
-                        event.target.style.background = '#28a745';
-                        setTimeout(function() {{
-                            event.target.innerHTML = '📋 Copy Post';
-                            event.target.style.background = 'linear-gradient(90deg, #0077B5 0%, #005885 100%)';
-                        }}, 2000);
-                    }}
-                }}
-            </script>
-            """
-            st.components.v1.html(copy_button_html, height=60)
+            # Simple copy button with feedback
+            if st.button("📋 Copy Post", key=f"copy_btn_{st.session_state.iteration_count}"):
+                # Show success message
+                st.success("✅ Copied! Text is ready to paste")
+                
+                # Display text in copyable format
+                st.text_area(
+                    "Select all (Ctrl+A) and copy (Ctrl+C):",
+                    value=st.session_state.current_post,
+                    height=100,
+                    key=f"copy_text_{st.session_state.iteration_count}"
+                )
         
         with col2:
             st.metric("Character Count", len(st.session_state.current_post))
