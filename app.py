@@ -3,12 +3,8 @@ import uuid
 from typing import List, Dict
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
-from dotenv import load_dotenv
 import os
 import time
-
-# Load environment variables
-load_dotenv()
 
 # Page configuration
 st.set_page_config(
@@ -75,48 +71,39 @@ st.markdown("""
         box-shadow: 0 5px 15px rgba(0,119,181,0.4);
         transform: translateY(-2px);
     }
+    
+    @media (max-width: 768px) {
+        .stColumn:nth-child(2) {
+            display: none !important;
+        }
+        .main-content {
+            flex-direction: column;
+        }
+    }
+    
+    @media (min-width: 769px) {
+        .main-content {
+            display: flex;
+            gap: 2rem;
+        }
+    }
+    
+    .copy-area {
+        border: 2px dashed #0077B5 !important;
+        border-radius: 10px !important;
+        background-color: #f0f8ff !important;
+    }
 </style>
-        # Custom CSS for better styling and mobile responsiveness
-        st.markdown("""
-        <style>
-        /* Hide quick topics on mobile */
-        @media (max-width: 768px) {
-            .stColumn:nth-child(2) {
-                display: none !important;
-            }
-        }
-        
-        /* Copy area styling */
-        .copy-area {
-            border: 2px dashed #0077B5 !important;
-            border-radius: 10px !important;
-            background-color: #f0f8ff !important;
-        }
-        
-        /* Mobile responsive layout */
-        @media (max-width: 768px) {
-            .main-content {
-                flex-direction: column;
-            }
-        }
-        
-        /* Desktop layout */
-        @media (min-width: 769px) {
-            .main-content {
-                display: flex;
-                gap: 2rem;
-            }
-        }
-        </style>
-        """, unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
 class LinkedInPostGenerator:
     def __init__(self):
-        if not os.getenv("OPENAI_API_KEY"):
-            st.error("⚠️ OpenAI API key not found! Please add it to your .env file or Streamlit secrets.")
+        if not st.secrets.get("OPENAI_API_KEY") and not os.getenv("OPENAI_API_KEY"):
+            st.error("⚠️ OpenAI API key not found! Please add it to your Streamlit secrets.")
             st.stop()
         
-        self.llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.7)
+        api_key = st.secrets.get("OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")
+        self.llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.7, api_key=api_key)
         
         # Initialize session state
         if 'generated_posts' not in st.session_state:
@@ -197,10 +184,6 @@ class LinkedInPostGenerator:
     def render_main_interface(self):
         """Render main application interface"""
         st.markdown('<h1 class="main-header">🚀 AI LinkedIn Post Generator</h1>', unsafe_allow_html=True)
-        
-        # Detect mobile (simple check based on viewport)
-        if 'is_mobile' not in st.session_state:
-            st.session_state.is_mobile = False
         
         # Topic input section
         st.markdown("### 📝 What would you like to write about?")
