@@ -73,19 +73,7 @@ st.markdown("""
     }
     
     @media (max-width: 768px) {
-        /* Completely hide quick topics section on mobile */
-        .quick-topics-mobile-hide {
-            display: none !important;
-        }
-        
-        /* Make the topic input full width on mobile by hiding the second column */
-        .stColumns > div:nth-child(2) {
-            display: none !important;
-        }
-        
-        .stColumns > div:nth-child(1) {
-            width: 100% !important;
-        }
+        /* No special mobile CSS needed - Quick Topics only in sidebar */
     }
     
     @media (min-width: 769px) {
@@ -196,66 +184,25 @@ class LinkedInPostGenerator:
         """Render main application interface"""
         st.markdown('<h1 class="main-header">🚀 AI LinkedIn Post Generator</h1>', unsafe_allow_html=True)
         
-        # Topic input section
+        # Topic input section - always full width, no quick topics on main area
         st.markdown("### 📝 What would you like to write about?")
         
-        # Only show quick topics if no post has been generated yet
-        if not st.session_state.current_post:
-            # Desktop: Show quick topics in main area
-            topic_col, quick_topics_col = st.columns([3, 1])
-            
-            with topic_col:
-                # Check for quick topic selection
-                if 'quick_topic' in st.session_state:
-                    topic = st.text_area(
-                        "Enter your LinkedIn topic or idea:",
-                        value=st.session_state.quick_topic,
-                        height=100,
-                        help="Describe what you want your LinkedIn post to be about. Be as specific as possible!"
-                    )
-                    del st.session_state.quick_topic  # Clear after use
-                else:
-                    topic = st.text_area(
-                        "Enter your LinkedIn topic or idea:",
-                        placeholder="e.g., The importance of continuous learning in tech careers...",
-                        height=100,
-                        help="Describe what you want your LinkedIn post to be about. Be as specific as possible!"
-                    )
-            
-            # Quick topics only on desktop (hidden on mobile via CSS)
-            with quick_topics_col:
-                st.markdown('<div class="quick-topics-mobile-hide">', unsafe_allow_html=True)
-                st.markdown("### 🎯 Quick Topics")
-                if st.button("💼 Career Growth", key="career"):
-                    st.session_state.quick_topic = "Career growth strategies for young professionals in tech"
-                    st.rerun()
-                if st.button("🤝 Networking", key="networking"):
-                    st.session_state.quick_topic = "The power of authentic networking in building meaningful professional relationships"
-                    st.rerun()
-                if st.button("🧠 Learning", key="learning"):
-                    st.session_state.quick_topic = "Why continuous learning is essential in today's fast-changing workplace"
-                    st.rerun()
-                if st.button("🚀 Innovation", key="innovation"):
-                    st.session_state.quick_topic = "How to foster innovation and creativity in remote work environments"
-                    st.rerun()
-                st.markdown('</div>', unsafe_allow_html=True)
+        # Check for quick topic selection from sidebar
+        if 'quick_topic' in st.session_state:
+            topic = st.text_area(
+                "Enter your LinkedIn topic or idea:",
+                value=st.session_state.quick_topic,
+                height=100,
+                help="Describe what you want your LinkedIn post to be about. Be as specific as possible!"
+            )
+            del st.session_state.quick_topic  # Clear after use
         else:
-            # When post exists, show only topic input (full width)  
-            if 'quick_topic' in st.session_state:
-                topic = st.text_area(
-                    "Enter your LinkedIn topic or idea:",
-                    value=st.session_state.quick_topic,
-                    height=100,
-                    help="Describe what you want your LinkedIn post to be about. Be as specific as possible!"
-                )
-                del st.session_state.quick_topic  # Clear after use
-            else:
-                topic = st.text_area(
-                    "Enter your LinkedIn topic or idea:",
-                    placeholder="e.g., The importance of continuous learning in tech careers...",
-                    height=100,
-                    help="Describe what you want your LinkedIn post to be about. Be as specific as possible!"
-                )
+            topic = st.text_area(
+                "Enter your LinkedIn topic or idea:",
+                placeholder="e.g., The importance of continuous learning in tech careers...",
+                height=100,
+                help="Describe what you want your LinkedIn post to be about. Be as specific as possible!"
+            )
         
         # Generate initial post
         if st.button("✨ Generate Post", type="primary", disabled=not topic):
