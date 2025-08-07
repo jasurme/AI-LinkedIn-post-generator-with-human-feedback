@@ -79,6 +79,14 @@ st.markdown("""
         .main-content {
             flex-direction: column;
         }
+        /* Make columns stack on mobile */
+        .stHorizontalBlock {
+            flex-direction: column !important;
+        }
+        .stColumn {
+            width: 100% !important;
+            margin-bottom: 1rem;
+        }
     }
     
     @media (min-width: 769px) {
@@ -266,9 +274,9 @@ class LinkedInPostGenerator:
             else:
                 st.warning("⚠️ Please enter a topic first!")
         
-        # Layout: Desktop (post on right, feedback on left) vs Mobile (stacked)
+        # Layout: Always show both sections, CSS handles responsive behavior  
         if st.session_state.current_post:
-            # Desktop layout - two columns
+            # Desktop: two columns, Mobile: stacked (handled by CSS)
             post_col, feedback_col = st.columns([1, 1])
             
             with post_col:
@@ -309,7 +317,7 @@ class LinkedInPostGenerator:
                     try {{
                         navigator.clipboard.writeText(textarea.value).then(function() {{
                             // Change button text temporarily
-                            event.target.innerHTML = '✅ Copied!';
+                            event.target.innerHTML = '✅ Copied';
                             event.target.style.background = '#28a745';
                             setTimeout(function() {{
                                 event.target.innerHTML = '📋 Copy Post';
@@ -319,7 +327,7 @@ class LinkedInPostGenerator:
                     }} catch (err) {{
                         // Fallback for older browsers
                         document.execCommand('copy');
-                        event.target.innerHTML = '✅ Copied!';
+                        event.target.innerHTML = '✅ Copied';
                         event.target.style.background = '#28a745';
                         setTimeout(function() {{
                             event.target.innerHTML = '📋 Copy Post';
