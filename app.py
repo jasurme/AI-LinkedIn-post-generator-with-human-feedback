@@ -153,21 +153,20 @@ class LinkedInPostGenerator:
             - "Add more emotional appeal"
             """)
             
-            # Quick topics in sidebar (always visible, especially for mobile)
-            if not st.session_state.current_post:  # Only show when no post generated
-                st.markdown("### 🎯 Quick Topics")
-                if st.button("💼 Career Growth", key="career_sidebar"):
-                    st.session_state.quick_topic = "Career growth strategies for young professionals in tech"
-                    st.rerun()
-                if st.button("🤝 Networking", key="networking_sidebar"):
-                    st.session_state.quick_topic = "The power of authentic networking in building meaningful professional relationships"
-                    st.rerun()
-                if st.button("🧠 Learning", key="learning_sidebar"):
-                    st.session_state.quick_topic = "Why continuous learning is essential in today's fast-changing workplace"
-                    st.rerun()
-                if st.button("🚀 Innovation", key="innovation_sidebar"):
-                    st.session_state.quick_topic = "How to foster innovation and creativity in remote work environments"
-                    st.rerun()
+            # Quick topics in sidebar (always visible for all users)
+            st.markdown("### 🎯 Quick Topics")
+            if st.button("💼 Career Growth", key="career_sidebar"):
+                st.session_state.quick_topic = "Career growth strategies for young professionals in tech"
+                st.rerun()
+            if st.button("🤝 Networking", key="networking_sidebar"):
+                st.session_state.quick_topic = "The power of authentic networking in building meaningful professional relationships"
+                st.rerun()
+            if st.button("🧠 Learning", key="learning_sidebar"):
+                st.session_state.quick_topic = "Why continuous learning is essential in today's fast-changing workplace"
+                st.rerun()
+            if st.button("🚀 Innovation", key="innovation_sidebar"):
+                st.session_state.quick_topic = "How to foster innovation and creativity in remote work environments"
+                st.rerun()
             
             st.markdown("### 📊 Session Stats")
             st.metric("Posts Generated", len(st.session_state.generated_posts))
