@@ -188,11 +188,46 @@ class LinkedInPostGenerator:
         # Topic input section
         st.markdown("### 📝 What would you like to write about?")
         
-        # Desktop layout: Show quick topics on main area
-        # Mobile layout: Hide quick topics from main area (moved to sidebar)
-        topic_col, quick_topics_col = st.columns([3, 1])
-        
-        with topic_col:
+        # Only show quick topics if no post has been generated yet
+        if not st.session_state.current_post:
+            # Desktop layout: Show quick topics on main area
+            topic_col, quick_topics_col = st.columns([3, 1])
+            
+            with topic_col:
+                # Check for quick topic selection
+                if 'quick_topic' in st.session_state:
+                    topic = st.text_area(
+                        "Enter your LinkedIn topic or idea:",
+                        value=st.session_state.quick_topic,
+                        height=100,
+                        help="Describe what you want your LinkedIn post to be about. Be as specific as possible!"
+                    )
+                    del st.session_state.quick_topic  # Clear after use
+                else:
+                    topic = st.text_area(
+                        "Enter your LinkedIn topic or idea:",
+                        placeholder="e.g., The importance of continuous learning in tech careers...",
+                        height=100,
+                        help="Describe what you want your LinkedIn post to be about. Be as specific as possible!"
+                    )
+            
+            # Quick topics only on desktop and only when no post generated
+            with quick_topics_col:
+                st.markdown("### 🎯 Quick Topics")
+                if st.button("💼 Career Growth", key="career"):
+                    st.session_state.quick_topic = "Career growth strategies for young professionals in tech"
+                    st.rerun()
+                if st.button("🤝 Networking", key="networking"):
+                    st.session_state.quick_topic = "The power of authentic networking in building meaningful professional relationships"
+                    st.rerun()
+                if st.button("🧠 Learning", key="learning"):
+                    st.session_state.quick_topic = "Why continuous learning is essential in today's fast-changing workplace"
+                    st.rerun()
+                if st.button("🚀 Innovation", key="innovation"):
+                    st.session_state.quick_topic = "How to foster innovation and creativity in remote work environments"
+                    st.rerun()
+        else:
+            # When post exists, show only topic input (full width)
             # Check for quick topic selection
             if 'quick_topic' in st.session_state:
                 topic = st.text_area(
@@ -209,22 +244,6 @@ class LinkedInPostGenerator:
                     height=100,
                     help="Describe what you want your LinkedIn post to be about. Be as specific as possible!"
                 )
-        
-        # Quick topics only on desktop
-        with quick_topics_col:
-            st.markdown("### 🎯 Quick Topics")
-            if st.button("💼 Career Growth", key="career"):
-                st.session_state.quick_topic = "Career growth strategies for young professionals in tech"
-                st.rerun()
-            if st.button("🤝 Networking", key="networking"):
-                st.session_state.quick_topic = "The power of authentic networking in building meaningful professional relationships"
-                st.rerun()
-            if st.button("🧠 Learning", key="learning"):
-                st.session_state.quick_topic = "Why continuous learning is essential in today's fast-changing workplace"
-                st.rerun()
-            if st.button("🚀 Innovation", key="innovation"):
-                st.session_state.quick_topic = "How to foster innovation and creativity in remote work environments"
-                st.rerun()
         
         # Generate initial post
         if st.button("✨ Generate Post", type="primary", disabled=not topic):
@@ -264,18 +283,53 @@ class LinkedInPostGenerator:
         st.markdown("### 📄 Your Generated Post")
         st.markdown(f'<div class="post-container">{st.session_state.current_post}</div>', unsafe_allow_html=True)
         
-        # Copy functionality using streamlit-clipboard (fallback to text_area)
+        # Real auto-copy functionality
         col1, col2 = st.columns([1, 1])
         
         with col1:
-            # Create a text area that's easy to copy from
-            st.text_area(
-                "👆 Select all and copy (Ctrl+C / Cmd+C):",
-                value=st.session_state.current_post,
-                height=100,
-                key=f"copy_area_{st.session_state.iteration_count}",
-                help="Click in the box above, press Ctrl+A (or Cmd+A) to select all, then Ctrl+C (or Cmd+C) to copy!"
-            )
+            # Create invisible text area and auto-copy button
+            post_text = st.session_state.current_post.replace('"', '\\"').replace('\n', '\\n')
+            copy_button_html = f"""
+            <div style="margin: 10px 0;">
+                <textarea id="post_content" style="position: absolute; left: -9999px;">{st.session_state.current_post}</textarea>
+                <button onclick="copyPost()" 
+                        style="background: linear-gradient(90deg, #0077B5 0%, #005885 100%);
+                               color: white; border-radius: 25px; border: none; 
+                               padding: 0.5rem 2rem; font-weight: 600;
+                               cursor: pointer; font-size: 14px;">
+                    📋 Copy Post
+                </button>
+            </div>
+            <script>
+                function copyPost() {{
+                    const textarea = document.getElementById('post_content');
+                    textarea.select();
+                    textarea.setSelectionRange(0, 99999);
+                    
+                    try {{
+                        navigator.clipboard.writeText(textarea.value).then(function() {{
+                            // Change button text temporarily
+                            event.target.innerHTML = '✅ Copied!';
+                            event.target.style.background = '#28a745';
+                            setTimeout(function() {{
+                                event.target.innerHTML = '📋 Copy Post';
+                                event.target.style.background = 'linear-gradient(90deg, #0077B5 0%, #005885 100%)';
+                            }}, 2000);
+                        }});
+                    }} catch (err) {{
+                        // Fallback for older browsers
+                        document.execCommand('copy');
+                        event.target.innerHTML = '✅ Copied!';
+                        event.target.style.background = '#28a745';
+                        setTimeout(function() {{
+                            event.target.innerHTML = '📋 Copy Post';
+                            event.target.style.background = 'linear-gradient(90deg, #0077B5 0%, #005885 100%)';
+                        }}, 2000);
+                    }}
+                }}
+            </script>
+            """
+            st.components.v1.html(copy_button_html, height=60)
         
         with col2:
             st.metric("Character Count", len(st.session_state.current_post))
@@ -288,26 +342,13 @@ class LinkedInPostGenerator:
         if st.session_state.all_feedbacks:
             st.info(f"📊 You've provided {len(st.session_state.all_feedbacks)} feedback(s) so far. Each one helps improve the next iteration!")
         
-        feedback_col1, feedback_col2 = st.columns([3, 1])
-        
-        with feedback_col1:
-            feedback = st.text_area(
-                "What would you like to improve?",
-                placeholder="e.g., Make it more engaging, add specific examples, shorten the length, include more hashtags...",
-                height=120,
-                help="Be specific about what you'd like to change. The AI will consider all your previous feedback too!"
-            )
-        
-        with feedback_col2:
-            st.markdown("### 🎨 Quick Feedback")
-            if st.button("🎯 More engaging", key="engaging"):
-                feedback = "Make the post more engaging and captivating for the LinkedIn audience"
-            if st.button("📏 Make shorter", key="shorter"):
-                feedback = "Make the post shorter and more concise while keeping the key message"
-            if st.button("💼 More professional", key="professional"):
-                feedback = "Make the tone more professional and business-appropriate"
-            if st.button("#️⃣ Add hashtags", key="hashtags"):
-                feedback = "Add more relevant hashtags to increase visibility"
+        # Only text area for feedback - no quick feedback buttons
+        feedback = st.text_area(
+            "What would you like to improve?",
+            placeholder="e.g., Make it more engaging, add specific examples, shorten the length, include more hashtags...",
+            height=120,
+            help="Be specific about what you'd like to change. The AI will consider all your previous feedback too!"
+        )
         
         # Process feedback
         if st.button("🔄 Regenerate with Feedback", type="primary", disabled=not feedback):
