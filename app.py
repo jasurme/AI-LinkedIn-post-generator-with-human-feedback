@@ -73,19 +73,9 @@ st.markdown("""
     }
     
     @media (max-width: 768px) {
-        .stColumn:nth-child(2) {
+        /* Only hide the quick topics section on mobile, not feedback */
+        .quick-topics-mobile-hide {
             display: none !important;
-        }
-        .main-content {
-            flex-direction: column;
-        }
-        /* Make columns stack on mobile */
-        .stHorizontalBlock {
-            flex-direction: column !important;
-        }
-        .stColumn {
-            width: 100% !important;
-            margin-bottom: 1rem;
         }
     }
     
@@ -166,18 +156,6 @@ class LinkedInPostGenerator:
             - "Add more emotional appeal"
             """)
             
-            # Quick topics on mobile (hide on desktop)
-            if st.session_state.get('is_mobile', False):
-                st.markdown("### 🎯 Quick Topics")
-                if st.button("💼 Career Growth", key="career_mobile"):
-                    st.session_state.quick_topic = "Career growth strategies for young professionals in tech"
-                if st.button("🤝 Networking", key="networking_mobile"):
-                    st.session_state.quick_topic = "The power of authentic networking in building meaningful professional relationships"
-                if st.button("🧠 Learning", key="learning_mobile"):
-                    st.session_state.quick_topic = "Why continuous learning is essential in today's fast-changing workplace"
-                if st.button("🚀 Innovation", key="innovation_mobile"):
-                    st.session_state.quick_topic = "How to foster innovation and creativity in remote work environments"
-            
             st.markdown("### 📊 Session Stats")
             st.metric("Posts Generated", len(st.session_state.generated_posts))
             st.metric("Feedback Given", len(st.session_state.all_feedbacks))
@@ -221,6 +199,7 @@ class LinkedInPostGenerator:
             
             # Quick topics only on desktop and only when no post generated
             with quick_topics_col:
+                st.markdown('<div class="quick-topics-mobile-hide">', unsafe_allow_html=True)
                 st.markdown("### 🎯 Quick Topics")
                 if st.button("💼 Career Growth", key="career"):
                     st.session_state.quick_topic = "Career growth strategies for young professionals in tech"
@@ -234,6 +213,7 @@ class LinkedInPostGenerator:
                 if st.button("🚀 Innovation", key="innovation"):
                     st.session_state.quick_topic = "How to foster innovation and creativity in remote work environments"
                     st.rerun()
+                st.markdown('</div>', unsafe_allow_html=True)
         else:
             # When post exists, show only topic input (full width)
             # Check for quick topic selection
